@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import os
 from email.mime.text import MIMEText
 import ssl
+from driver import valid, addUser, linkCRN, unlinkCRN, getCRNsByUser, delUser, getUniqueCRNs, getUsersByCRN, getUnsubValue
 
 load_dotenv()
 
