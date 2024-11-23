@@ -1,13 +1,11 @@
 import requests
 
-import requests
-
 BASE_URL = "http://127.0.0.1:5000"
 
 def make_request(endpoint, data):
     url = f"{BASE_URL}{endpoint}"
     response = requests.post(url, json=data)
-    return response.json()
+    return response
 
 # Example usage:
 if __name__ == "__main__":
