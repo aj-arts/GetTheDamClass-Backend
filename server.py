@@ -74,4 +74,4 @@ def unsubscribe():
 if __name__ == '__main__':
     task_thread = threading.Thread(target=loop, daemon=True)
     task_thread.start()
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
