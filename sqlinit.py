@@ -29,7 +29,7 @@ def create_tables():
             ID INT NOT NULL,
             CRN_NUMBER INT NOT NULL,
             PRIMARY KEY (ID, CRN_NUMBER),
-            FOREIGN KEY (ID) REFERENCES Users(ID)
+            FOREIGN KEY (ID) REFERENCES Users(ID) ON DELETE CASCADE
         );
         """
         
@@ -66,3 +66,6 @@ def create_tables():
             cursor.close()
             myDb.close()
             print("Database connection closed.")
+
+if __name__ == "__main__":
+    create_tables()
