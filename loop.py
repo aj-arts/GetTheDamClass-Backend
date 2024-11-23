@@ -1,17 +1,12 @@
-from flask import Flask, request, jsonify
-import ssl
 import smtplib
-import email
-from email.mime.text import MIMEText
-from dotenv import load_dotenv
-import os
 import requests
 import bs4
-import hashlib
+from dotenv import load_dotenv
+import os
+from email.mime.text import MIMEText
+import ssl
 
 load_dotenv()
-
-app = Flask(__name__)
 
 def getCourseName(crn):
     data = {
@@ -49,17 +44,20 @@ def isVacant(crn):
     vacancy = capacity - actual
     return vacancy > 0
 
-def notifyUsers(crn, users):
+def notifyUsers(crn, isvacant, users):
+    cname = getCourseName(crn)
+
     port = 465
     smtp_server = "smtp.gmail.com"
     sender_email = os.getenv("EMAIL")
     password = os.getenv("PASSWORD")
+    status = "vacant" if isvacant else "full"
 
-    body = f"Class with CRN {crn} has been updated. Please check your schedule."
+    body = f"Your class {cname} with CRN {crn} is {status}. Please check your schedule."
     msg = MIMEText(body)
     msg["From"] = sender_email
     msg["To"] = sender_email
-    msg["Subject"] = f"Class Notification for CRN {crn}"
+    msg["Subject"] = f"GetTheDamClass Notification for {cname}"
     msg["BCC"] = ", ".join(users)
 
     context = ssl.create_default_context()
@@ -69,43 +67,14 @@ def notifyUsers(crn, users):
 
 def loop():
     while True:
-        pass
-
-@app.route('/signup', methods=['POST'])
-def signup():
-    data = request.json
-    email = data.get("email")
-    pin = data.get("pin")
-    return jsonify({"message": "User signed up successfully"}), 200
-
-@app.route('/sub', methods=['POST'])
-def sub():
-    data = request.json
-    crn = data.get("crn")
-    email = data.get("email")
-    pin = data.get("pin")
-    return jsonify({"message": f"Subscribed to class {crn} successfully"}), 200
-
-@app.route('/unsub', methods=['POST'])
-def unsub():
-    data = request.json
-    crn = data.get("crn")
-    email = data.get("email")
-    pin = data.get("pin")
-    return jsonify({"message": f"Unsubscribed from class {crn} successfully"}), 200
-
-@app.route('/getsubs', methods=['POST'])
-def getsubs():
-    data = request.json
-    email = data.get("email")
-    pin = data.get("pin")
-    subs = []
-    return jsonify({"subs": subs}), 200
-
-@app.route('/unsubscribe', methods=['GET'])
-def unsubscribe():
-    value = request.args.get("value")
-    return jsonify({"message": f"Unsubscribed successfully"}), 200
-
-if __name__ == '__main__':
-    app.run(debug=True)
+        for crn in unique_crns:
+            isvacant = isVacant(crn)
+            wasvacant = wasVacant(crn)
+            if isvacant and not wasvacant:
+                users = getUsersByCRN(crn)
+                notifyUsers(crn, isvacant, users)
+                setWasVacant(crn, True)
+            elif not isvacant and wasvacant:
+                users = getUsersByCRN(crn)
+                notifyUsers(crn, isvacant, users)
+                setWasVacant(crn, False)
