@@ -1,12 +1,16 @@
 import mysql.connector
 import bcrypt
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # Database Connection
 myDb = mysql.connector.connect(
     host="localhost",
-    port=3306,
-    user="root",
-    password="root",
+    port= os.getenv("DB_PORT"),
+    user= os.getenv("DB_USER"),
+    password= os.getenv("DB_PASS"),
     database="getthedamclass"
 )
 

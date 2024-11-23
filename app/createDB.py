@@ -1,14 +1,21 @@
 import mysql.connector
 from mysql.connector import Error
 import argparse
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
 
 def create_database_and_tables():
     try:
         # Establish the connection to MySQL server
         connection = mysql.connector.connect(
-            host='localhost',
-            user='root',      
-            password='root' 
+            host="localhost",
+            port= os.getenv("DB_PORT"),
+            user= os.getenv("DATABASE_USER"),
+            password= os.getenv("DATABASE_PASSWORD"),
+            database=os.getenv("DATABASE_NAME")
         )
 
         if connection.is_connected():
