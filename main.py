@@ -7,12 +7,13 @@ from dotenv import load_dotenv
 import os
 import requests
 import bs4
+import hashlib
 
 load_dotenv()
 
 app = Flask(__name__)
 
-def get_course_name(crn):
+def getCourseName(crn):
     data = {
         'term': '202502',
         'courseReferenceNumber': crn,
@@ -66,6 +67,10 @@ def notifyUsers(crn, users):
         server.login(sender_email, password)
         server.sendmail(msg["From"], users + [msg["To"]], msg.as_string())
 
+def loop():
+    while True:
+        pass
+
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.json
@@ -96,6 +101,11 @@ def getsubs():
     pin = data.get("pin")
     subs = []
     return jsonify({"subs": subs}), 200
+
+@app.route('/unsubscribe', methods=['GET'])
+def unsubscribe():
+    value = request.args.get("value")
+    return jsonify({"message": f"Unsubscribed successfully"}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
