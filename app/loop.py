@@ -9,6 +9,19 @@ from driver import getUniqueCRNs, getUsersByCRN, getUnsubValue, wasVacant, setWa
 
 load_dotenv()
 
+def crnExists(crn):
+    data = {
+        'term': '202502',
+        'courseReferenceNumber': crn,
+    }
+
+    response = requests.post(
+        'https://prodapps.isadm.oregonstate.edu/StudentRegistrationSsb/ssb/searchResults/getClassDetails',
+        data=data,
+    )
+
+    return response.status_code == 200
+
 def getCourseName(crn):
     cname = getCourseNameDB(crn)
     if not cname:

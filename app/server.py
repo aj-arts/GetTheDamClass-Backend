@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from loop import checkVacancies, confirmSub, getCourseName
+from loop import checkVacancies, confirmSub, getCourseName, crnExists
 from driver import valid, addUser, linkCRN, unlinkCRN, getCRNsByUser, delSubscription, deleteUser, userExists
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -69,6 +69,9 @@ def sub():
     if not validEmail(email) or not validPin(pin) or not validCRN(crn) or not valid(email, pin):
         return jsonify({"message": "Invalid email, pin, or crn"}), 400
     
+    if not crnExists(crn):
+        return jsonify({"message": "CRN doesn't exist"}), 400
+    
     if not linkCRN(crn, email):
         return jsonify({"message": "Couldn't subscribe to class. Try again!"}), 400
     
@@ -85,6 +88,9 @@ def unsub():
 
     if not validEmail(email) or not validPin(pin) or not validCRN(crn) or not valid(email, pin):
         return jsonify({"message": "Invalid email, pin, or crn"}), 400
+    
+    if not crnExists(crn):
+        return jsonify({"message": "CRN doesn't exist"}), 400
 
     if not unlinkCRN(crn, email):
         return jsonify({"message": "Couldn't unsubscribe from class. Try again!"}), 400
