@@ -22,7 +22,7 @@ def create_database_and_tables():
             cursor = connection.cursor()
 
             # Step 1: Create a new database
-            database_name = 'getthedamclass'  # Replace with your desired database name
+            database_name = os.getenv("DATABASE_NAME")  # Replace with your desired database name
             create_database_query = f"CREATE DATABASE IF NOT EXISTS {database_name};"
             cursor.execute(create_database_query)
             print(f"Database '{database_name}' created or already exists.")

@@ -48,8 +48,8 @@ def isVacant(crn):
 def notifyUsers(crn, isvacant, users):
     cname = getCourseName(crn)
 
-    port = 465
-    smtp_server = "smtp.gmail.com"
+    port = os.getenv("EMAIL_PORT")
+    smtp_server = os.getenv("EMAIL_SMTP")
     sender_email = os.getenv("EMAIL")
     password = os.getenv("PASSWORD")
     status = "vacant" if isvacant else "full"
