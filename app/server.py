@@ -13,6 +13,7 @@ cors = CORS(app, resources={r"/sub": {"origins": "*"}})
 
 # Helper function to validate email format
 def validEmail(email):
+    email = str(email)
     if email is None or email == "" or "@" not in email or email.strip() == "":
         print(f"Invalid email: {email}")
         return False
@@ -20,12 +21,14 @@ def validEmail(email):
 
 # Helper function to validate pin format
 def validPin(pin):
+    pin = str(pin)
     if pin is None or pin == "" or pin.strip() == "" or len(pin) != 4 or not pin.isdigit():
         return False
     return True
 
 # Helper function to validate CRN format
 def validCRN(crn):
+    crn = str(crn)
     if crn is None or crn == "" or crn.strip() == "" or not crn.isdigit():
         print(f"Invalid CRN: {crn}")
         return False
@@ -33,6 +36,7 @@ def validCRN(crn):
 
 # Helper function to validate general values
 def validValue(value):
+    value = str(value)
     if value is None or value == "" or value.strip() == "":
         print(f"Invalid value: {value}")
         return False
