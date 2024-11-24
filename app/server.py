@@ -63,7 +63,7 @@ def signup():
             return jsonify({"message": "User logged in"}), 200
         else:
             print(f"User already exists: {email}")
-            return jsonify({"message": "Wrong pin. Try again!"}), 409
+            return jsonify({"message": "Wrong pin. Try again!"}), 401
     
     if not addUser(email, pin):
         print(f"Failed to add user: {email}")
