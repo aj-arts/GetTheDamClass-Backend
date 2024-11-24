@@ -83,6 +83,7 @@ def notifyUsers(crn, isvacant, users):
         with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
             server.login(sender_email, password)
             server.sendmail(msg["From"], users + [msg["To"]], msg.as_string())
+            print(f"Notification sent to {users}")
     except:
         print("Failed to send notification email")
 
@@ -109,6 +110,7 @@ def confirmSub(crn, email):
         with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
             server.login(sender_email, password)
             server.sendmail(msg["From"], msg["To"], msg.as_string())
+            print(f"Confirmation sent to {email}")
     except:
         print("Failed to send confirmation email")
 
