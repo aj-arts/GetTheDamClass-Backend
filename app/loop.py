@@ -5,29 +5,33 @@ from dotenv import load_dotenv
 import os
 from email.mime.text import MIMEText
 import ssl
-from driver import getUniqueCRNs, getUsersByCRN, getUnsubValue, wasVacant, setWasVacant
+from driver import getUniqueCRNs, getUsersByCRN, getUnsubValue, wasVacant, setWasVacant, getCourseNameDB, setCourseNameDB
 
 load_dotenv()
 
 def getCourseName(crn):
-    data = {
-        'term': '202502',
-        'courseReferenceNumber': crn,
-    }
+    cname = getCourseNameDB(crn)
+    if not cname:
+        data = {
+            'term': '202502',
+            'courseReferenceNumber': crn,
+        }
 
-    response = requests.post(
-        'https://prodapps.isadm.oregonstate.edu/StudentRegistrationSsb/ssb/searchResults/getClassDetails',
-        data=data,
-    )
+        response = requests.post(
+            'https://prodapps.isadm.oregonstate.edu/StudentRegistrationSsb/ssb/searchResults/getClassDetails',
+            data=data,
+        )
 
-    soup = bs4.BeautifulSoup(response.text, 'html.parser')
+        soup = bs4.BeautifulSoup(response.text, 'html.parser')
 
-    subject = soup.find('span', {'id': 'subject'}).text
-    courseNumber = soup.find('span', {'id': 'courseNumber'}).text
-    courseTitle = soup.find('span', {'id': 'courseTitle'}).text
+        subject = soup.find('span', {'id': 'subject'}).text
+        courseNumber = soup.find('span', {'id': 'courseNumber'}).text
+        courseTitle = soup.find('span', {'id': 'courseTitle'}).text
 
-    name = f'{subject} {courseNumber} - {courseTitle}'
-    return name
+        name = f'{subject} {courseNumber} - {courseTitle}'
+        setCourseNameDB(crn, name)
+        return name
+    return cname
 
 def isVacant(crn):
     response = requests.post(
