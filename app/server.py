@@ -3,8 +3,10 @@ from loop import checkVacancies, confirmSub, getCourseName
 from driver import valid, addUser, linkCRN, unlinkCRN, getCRNsByUser, delSubscription, deleteUser
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
+from flask_cors import CORS
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"/sub/": {"origins": "*.oregonstate.edu"}})
 
 def validEmail(email):
     if email is None or email == "" or "@" not in email or email.strip() == "":
