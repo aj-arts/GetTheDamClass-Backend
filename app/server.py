@@ -45,7 +45,7 @@ def signup():
     email = data.get("email")
     pin = data.get("pin")
 
-    print(f"Signup attempt: email={email}, pin={pin}")
+    print(f"Signup attempt: email={email}")
 
     if not validEmail(email) or not validPin(pin):
         return jsonify({"message": "Invalid email or pin"}), 400
@@ -68,7 +68,7 @@ def deleteuser():
     email = data.get("email")
     pin = data.get("pin")
 
-    print(f"Delete user attempt: email={email}, pin={pin}")
+    print(f"Delete user attempt: email={email}")
 
     if not validEmail(email) or not validPin(pin) or not valid(email, pin):
         return jsonify({"message": "Invalid email or pin"}), 400
@@ -94,7 +94,7 @@ def sub():
     email = data.get("email")
     pin = data.get("pin")
 
-    print(f"Subscribe attempt: email={email}, pin={pin}, crn={crn}")
+    print(f"Subscribe attempt: email={email}, crn={crn}")
 
     if not validEmail(email) or not validPin(pin) or not validCRN(crn):
         return jsonify({"message": "Invalid email, pin, or crn"}), 400
@@ -130,7 +130,7 @@ def unsub():
     email = data.get("email")
     pin = data.get("pin")
 
-    print(f"Unsubscribe attempt: email={email}, pin={pin}, crn={crn}")
+    print(f"Unsubscribe attempt: email={email}, crn={crn}")
 
     if not validEmail(email) or not validPin(pin) or not validCRN(crn):
         return jsonify({"message": "Invalid email, pin, or crn"}), 400
@@ -164,7 +164,7 @@ def getsubs():
     email = data.get("email")
     pin = data.get("pin")
 
-    print(f"Get subscriptions: email={email}, pin={pin}")
+    print(f"Get subscriptions: email={email}")
 
     if not validEmail(email) or not validPin(pin):
         return jsonify({"message": "Invalid email or pin"}), 400
