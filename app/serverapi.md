@@ -35,8 +35,38 @@
   ```
 
 ---
+### 2. **Delete User**
 
-### 2. **Subscribe to Class**
+**Endpoint:** `/deleteuser`
+**Method:** `POST`
+
+**Description:** Delete a user and all their subscriptions from the database.
+
+**Request Body:**  
+```json
+{
+  "email": "user@example.com",
+  "pin": "1234"
+}
+```
+
+**Response:**
+- **200 OK:**  
+  ```json
+  {
+    "message": "User deleted successfully"
+  }
+  ```
+- **400 Bad Request:**  
+  ```json
+  {
+    "message": "Couldn't delete user. Try again!"
+  }
+  ```
+
+---
+
+### 3. **Subscribe to Class**
 
 **Endpoint:** `/sub`  
 **Method:** `POST`
@@ -68,7 +98,7 @@
 
 ---
 
-### 3. **Unsubscribe from Class**
+### 4. **Unsubscribe from Class**
 
 **Endpoint:** `/unsub`  
 **Method:** `POST`
@@ -100,7 +130,7 @@
 
 ---
 
-### 4. **Get Subscribed Classes**
+### 5. **Get Subscribed Classes**
 
 **Endpoint:** `/getsubs`  
 **Method:** `POST`
@@ -133,7 +163,7 @@
 
 ---
 
-### 5. **Unsubscribe All (with Query Parameters)**
+### 6. **Unsubscribe All (with Query Parameters)**
 
 **Endpoint:** `/unsubscribe`  
 **Method:** `GET`
