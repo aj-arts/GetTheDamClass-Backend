@@ -12,7 +12,7 @@ def connect_to_db(attempts=5, delay=5):
     for attempt in range(attempts):
         try:
             myDb = mysql.connector.connect(
-                host="localhost",
+                host=os.getenv("DATABASE_HOST"),
                 port=os.getenv("DATABASE_PORT"),
                 user=os.getenv("DATABASE_USER"),
                 password=os.getenv("DATABASE_PASSWORD"),
