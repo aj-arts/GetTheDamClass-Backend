@@ -11,7 +11,7 @@ def create_database_and_tables():
     try:
         # Connect to MySQL server
         connection = mysql.connector.connect(
-            host="localhost",
+            host=os.getenv("DATABASE_HOST"),
             port= os.getenv("DATABASE_PORT"),
             user= os.getenv("DATABASE_USER"),
             password= os.getenv("DATABASE_PASSWORD"),
@@ -95,7 +95,7 @@ def insert_test_data():
     try:
         # Connect to the MySQL database
         connection = mysql.connector.connect(
-            host="localhost",
+            host=os.getenv("DATABASE_HOST"),
             port= os.getenv("DATABASE_PORT"),
             user= os.getenv("DATABASE_USER"),
             password= os.getenv("DATABASE_PASSWORD"),
