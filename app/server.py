@@ -173,7 +173,7 @@ def getsubs():
         return jsonify({"message": "User authentication failed"}), 401
 
     crns = getCRNsByUser(email)
-    sublist = [{"crn": crn, "cname": getCourseName(crn)} for crn in crns]
+    sublist = [{"crn": crn, "name": getCourseName(crn)} for crn in crns]
 
     print(f"Subscriptions retrieved for {email}: {sublist}")
     return jsonify({"subs": sublist}), 200
