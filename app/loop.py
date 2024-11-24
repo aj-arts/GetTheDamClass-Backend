@@ -4,6 +4,7 @@ import bs4
 from dotenv import load_dotenv
 import os
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import ssl
 from driver import getUniqueCRNs, getUsersByCRN, getUnsubValue, wasVacant, setWasVacant, getCourseNameDB, setCourseNameDB, purgeUnusedCRNs
 
@@ -37,11 +38,11 @@ def getCourseName(crn):
 
         soup = bs4.BeautifulSoup(response.text, 'html.parser')
 
-        subject = soup.find('span', {'id': 'subject'}).text
-        courseNumber = soup.find('span', {'id': 'courseNumber'}).text
+        # subject = soup.find('span', {'id': 'subject'}).text
+        # courseNumber = soup.find('span', {'id': 'courseNumber'}).text
         courseTitle = soup.find('span', {'id': 'courseTitle'}).text
 
-        name = f'{subject} {courseNumber} - {courseTitle}'
+        name = f'{courseTitle}'
         setCourseNameDB(crn, name)
         return name
     return cname
@@ -99,11 +100,113 @@ def confirmSub(crn, email):
     password = os.getenv("EMAIL_PASSWORD")
     baseurl = os.getenv("BASE_URL")
 
-    body = f"Thank you for subscribing to {cname} with CRN {crn}. To unsubscribe, click the following link: {baseurl}/unsubscribe?value={unsubval}"
-    msg = MIMEText(body)
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = f"GetTheDamClass Subscription Confirmation for {cname} with CRN {crn}"
     msg["From"] = sender_email
     msg["To"] = email
-    msg["Subject"] = f"GetTheDamClass Subscription Confirmation for {cname}"
+
+    html_content = f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                :root {{
+                    --lt-color-gray-100: #f8f9fc;
+                    --lt-color-gray-300: #dee3ed;
+                    --accent-color: #D73F09;
+                    --text-color: var(--lt-color-gray-300);
+                    --background-color: #383737;
+                }}
+                
+                body {{
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background-color: var(--lt-color-gray-100);
+                    color: var(--text-color);
+                }}
+
+                .email-container {{
+                    max-width: 600px;
+                    margin: 2rem auto;
+                    background-color: var(--background-color);
+                    border-radius: 8px;
+                    padding: 2rem;
+                    color: var(--lt-color-gray-100);
+                }}
+
+                .email-header {{
+                    text-align: center;
+                    padding-bottom: 1rem;
+                    border-bottom: 2px solid var(--accent-color);
+                }}
+
+                .email-header h1 {{
+                    margin: 0;
+                    color: var(--lt-color-gray-100);
+                }}
+
+                .email-body {{
+                    margin-top: 1.5rem;
+                    line-height: 1.6;
+                    font-size: 1rem;
+                }}
+
+                .email-footer {{
+                    text-align: center;
+                    margin-top: 2rem;
+                    padding-top: 1rem;
+                    border-top: 2px solid var(--accent-color);
+                    font-size: 0.9rem;
+                    color: var(--lt-color-gray-300);
+                }}
+
+                .cta-button {{
+                    display: inline-block;
+                    padding: 0.8rem 1.5rem;
+                    margin-top: 1.5rem;
+                    background-color: var(--accent-color);
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    font-size: 1rem;
+                    font-weight: bold;
+                }}
+
+                .cta-button:hover {{
+                    background-color: #bf2e08;
+                }}
+            </style>
+            <title>Notification Email</title>
+        </head>
+        <body>
+            <div class="email-container">
+                <div class="email-header">
+                    <h1>Confirmation for {cname} {crn}</h1>
+                </div>
+                <div class="email-body">
+                    <p>Hello,</p>
+                    <p>We wanted to let you know that you have successfully subscribed for notifications for the class {cname} with CRN {crn}. If you want to unsubscribe from notifications, feel free to click the following button or use the extension.</p>
+                    <a href="{baseurl}/unsubscribe/?value={unsubval}" class="cta-button">Unsubcribe</a>
+                    <p>If you have any questions, feel free to reach out to us.</p>
+                </div>
+                <div class="email-footer">
+                    <p>&copy; 2024 Nothing Suspicious | All rights reserved.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+    # Attach the HTML content to the email
+    mime_html = MIMEText(html_content, "html")
+    msg.attach(mime_html)
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(msg["From"], msg["To"], msg.as_string())
 
     context = ssl.create_default_context()
     try:
