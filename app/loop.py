@@ -79,9 +79,12 @@ def notifyUsers(crn, isvacant, users):
     msg["BCC"] = ", ".join(users)
 
     context = ssl.create_default_context()
-    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-        server.login(sender_email, password)
-        server.sendmail(msg["From"], users + [msg["To"]], msg.as_string())
+    try:
+        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+            server.login(sender_email, password)
+            server.sendmail(msg["From"], users + [msg["To"]], msg.as_string())
+    except:
+        print("Failed to send notification email")
 
 def confirmSub(crn, email):
     status = isVacant(crn)
@@ -91,8 +94,8 @@ def confirmSub(crn, email):
 
     port = os.getenv("EMAIL_PORT")
     smtp_server = os.getenv("EMAIL_SMTP")
-    sender_email = os.getenv("EMAIL")
-    password = os.getenv("PASSWORD")
+    sender_email = os.getenv("EMAIL_USER")
+    password = os.getenv("EMAIL_PASSWORD")
     baseurl = os.getenv("BASE_URL")
 
     body = f"Thank you for subscribing to {cname} with CRN {crn}. To unsubscribe, click the following link: {baseurl}/unsubscribe?value={unsubval}"
@@ -102,9 +105,12 @@ def confirmSub(crn, email):
     msg["Subject"] = f"GetTheDamClass Subscription Confirmation for {cname}"
 
     context = ssl.create_default_context()
-    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-        server.login(sender_email, password)
-        server.sendmail(msg["From"], msg["To"], msg.as_string())
+    try:
+        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+            server.login(sender_email, password)
+            server.sendmail(msg["From"], msg["To"], msg.as_string())
+    except:
+        print("Failed to send confirmation email")
 
 def checkVacancies():
     for crn in getUniqueCRNs():
