@@ -49,14 +49,21 @@ def signup():
     email = data.get("email")
     pin = data.get("pin")
 
+    email = str(email)
+    pin = str(pin)
+
     print(f"Signup attempt: email={email}")
 
     if not validEmail(email) or not validPin(pin):
         return jsonify({"message": "Invalid email or pin"}), 400
     
     if userExists(email):
-        print(f"User already exists: {email}")
-        return jsonify({"message": "User already exists"}), 409
+        if valid(email, pin):
+            print(f"User already exists: {email}")
+            return jsonify({"message": "User logged in"}), 200
+        else:
+            print(f"User already exists: {email}")
+            return jsonify({"message": "Wrong pin. Try again!"}), 409
     
     if not addUser(email, pin):
         print(f"Failed to add user: {email}")
@@ -71,6 +78,9 @@ def deleteuser():
     data = request.json
     email = data.get("email")
     pin = data.get("pin")
+
+    email = str(email)
+    pin = str(pin)
 
     print(f"Delete user attempt: email={email}")
 
@@ -97,6 +107,10 @@ def sub():
     crn = data.get("crn")
     email = data.get("email")
     pin = data.get("pin")
+
+    crn = str(crn)
+    email = str(email)
+    pin = str(pin)
 
     print(f"Subscribe attempt: email={email}, crn={crn}")
 
@@ -134,6 +148,10 @@ def unsub():
     email = data.get("email")
     pin = data.get("pin")
 
+    crn = str(crn)
+    email = str(email)
+    pin = str(pin)
+
     print(f"Unsubscribe attempt: email={email}, crn={crn}")
 
     if not validEmail(email) or not validPin(pin) or not validCRN(crn):
@@ -168,6 +186,9 @@ def getsubs():
     email = data.get("email")
     pin = data.get("pin")
 
+    email = str(email)
+    pin = str(pin)
+
     print(f"Get subscriptions: email={email}")
 
     if not validEmail(email) or not validPin(pin):
@@ -186,6 +207,7 @@ def getsubs():
 @app.route('/unsubscribe', methods=['GET'])
 def unsubscribe():
     value = request.args.get("value")
+    value = str(value)
     print(f"Unsubscribe using value: {value}")
 
     if not validValue(value):
