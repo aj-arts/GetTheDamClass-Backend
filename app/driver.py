@@ -31,12 +31,15 @@ myDb = connect_to_db()
 cursor = myDb.cursor()
 
 def valid(email, pin):
-    cursor.execute("SELECT HASHED_PIN FROM Users WHERE EMAIL_ADDRESS = %s", (email,))
-    result = cursor.fetchone()
-    if result is None:
-        return False    
-
-    return bcrypt.checkpw(pin.encode(), result[0].encode())
+    try:
+        cursor.execute("SELECT HASHED_PIN FROM Users WHERE EMAIL_ADDRESS = %s", (email,))
+        result = cursor.fetchone()
+        if result is None:
+            return False    
+        return bcrypt.checkpw(pin.encode(), result[0].encode())
+    except Exception as e:
+        print(f"Error validating user: {e}")
+        return False
 
 
 def addUser(email, pin):
