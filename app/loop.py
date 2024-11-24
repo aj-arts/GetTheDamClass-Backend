@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 from email.mime.text import MIMEText
 import ssl
-from driver import getUniqueCRNs, getUsersByCRN, getUnsubValue, wasVacant, setWasVacant, getCourseNameDB, setCourseNameDB
+from driver import getUniqueCRNs, getUsersByCRN, getUnsubValue, wasVacant, setWasVacant, getCourseNameDB, setCourseNameDB, purgeUnusedCRNs
 
 load_dotenv()
 
@@ -116,6 +116,7 @@ def confirmSub(crn, email):
 
 def checkVacancies():
     print("Checking for vacancies...")
+    print("Purged unused CRNs") if purgeUnusedCRNs() else print("Failed to purge unused CRNs")
     for crn in getUniqueCRNs():
         isvacant = isVacant(crn)
         print(f"CRN {crn} is vacant: {isvacant}")
