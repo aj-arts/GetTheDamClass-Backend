@@ -8,10 +8,10 @@ load_dotenv()
 # Database Connection
 myDb = mysql.connector.connect(
     host="localhost",
-    port= os.getenv("DB_PORT"),
-    user= os.getenv("DB_USER"),
-    password= os.getenv("DB_PASS"),
-    database="getthedamclass"
+    port= os.getenv("DATABASE_PORT"),
+    user= os.getenv("DATABASE_USER"),
+    password= os.getenv("DATABASE_PASSWORD"),
+    database=os.getenv("DATABASE_NAME")
 )
 
 cursor = myDb.cursor()
@@ -116,6 +116,20 @@ def purgeUnusedUsers():
 
 def deleteUser(email):
     cursor.execute("DELETE FROM Users WHERE EMAIL_ADDRESS = %s", (email,))
+    myDb.commit()
+    if cursor.rowcount == 0:
+        return False
+    return True
+
+def wasVacant(crn):
+    cursor.execute("SELECT VACANT FROM CRN_Status WHERE CRN_NUMBER = %s", (crn,))
+    result = cursor.fetchone()
+    if result is None:
+        return False
+    return result[0]
+
+def setWasVacant(crn, vacant):
+    cursor.execute("INSERT INTO CRN_Status (CRN_NUMBER, VACANT) VALUES (%s, %s) ON DUPLICATE KEY UPDATE VACANT = %s", (crn, vacant, vacant))
     myDb.commit()
     if cursor.rowcount == 0:
         return False
