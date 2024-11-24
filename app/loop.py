@@ -66,7 +66,7 @@ def notifyUsers(crn, isvacant, users):
     cname = getCourseName(crn)
 
     port = os.getenv("EMAIL_PORT")
-    smtp_server = os.getenv("EMAIL_SMTP")
+    smtp_server = os.getenv("EMAIL_HOST")
     sender_email = os.getenv("EMAIL_USER")
     password = os.getenv("EMAIL_PASSWORD")
     status = "vacant" if isvacant else "full"
@@ -93,7 +93,7 @@ def confirmSub(crn, email):
     unsubval = getUnsubValue(crn, email)
 
     port = os.getenv("EMAIL_PORT")
-    smtp_server = os.getenv("EMAIL_SMTP")
+    smtp_server = os.getenv("EMAIL_HOST")
     sender_email = os.getenv("EMAIL_USER")
     password = os.getenv("EMAIL_PASSWORD")
     baseurl = os.getenv("BASE_URL")
