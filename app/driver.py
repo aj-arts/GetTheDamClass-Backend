@@ -95,8 +95,7 @@ def delSubscription(subsubToken):
 def getUniqueCRNs():
     cursor.execute("SELECT DISTINCT CRN_NUMBER FROM Subscription")
     results = cursor.fetchall()
-    return [{"CRN": crn, "COURSE_NAME": course_name} for crn, course_name in results]
-
+    return [crn[0] for crn in results]
 
 def getUsersByCRN(CRN):
     cursor.execute("SELECT u.EMAIL_ADDRESS FROM Users u JOIN Subscription s ON u.ID = s.ID WHERE s.CRN_NUMBER = %s", (CRN,))
