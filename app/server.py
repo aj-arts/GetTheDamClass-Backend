@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-cors = CORS(app, resources={r"/sub": {"origins": "*"}})
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Helper function to validate email format
 def validEmail(email):
