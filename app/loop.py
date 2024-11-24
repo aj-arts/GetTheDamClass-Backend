@@ -189,7 +189,7 @@ def confirmSub(crn, email):
                 <div class="email-body">
                     <p>Hello,</p>
                     <p>We wanted to let you know that you have successfully subscribed for notifications for the class {cname} with CRN {crn}. If you want to unsubscribe from notifications, feel free to click the following button or use the extension.</p>
-                    <a href="{baseurl}/unsubscribe/?value={unsubval}" class="cta-button">Unsubscribe</a>
+                    <a href="{baseurl}/unsubscribe?value={unsubval}" class="cta-button">Unsubscribe</a>
                     <p>If you have any questions, feel free to reach out to us.</p>
                 </div>
                 <div class="email-footer">
