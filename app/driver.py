@@ -35,7 +35,7 @@ def valid(email, pin):
         cursor = conn.cursor()
         cursor.execute("SELECT HASHED_PIN FROM Users WHERE EMAIL_ADDRESS = %s", (email,))
         result = cursor.fetchone()
-        return bcrypt.checkpw(pin.encode(), result[0].encode()) if result else False
+        return bcrypt.checkpw(str(pin).encode(), result[0].encode()) if result else False
     except Exception as e:
         print(f"Error validating user: {e}")
         return False
@@ -47,7 +47,7 @@ def addUser(email, pin):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        hashed = bcrypt.hashpw(pin.encode(), bcrypt.gensalt())
+        hashed = bcrypt.hashpw(str(pin).encode(), bcrypt.gensalt())
         cursor.execute("INSERT IGNORE INTO Users (EMAIL_ADDRESS, HASHED_PIN) VALUES (%s, %s)", (email, hashed.decode()))
         conn.commit()
         return True
