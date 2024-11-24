@@ -93,7 +93,7 @@ def getsubs():
     data = request.json
     email = data.get("email")
     pin = data.get("pin")
-    subs = {}
+    sublist = []
 
     if not validEmail(email) or not validPin(pin) or not valid(email, pin):
         return jsonify({"message": "Invalid email or pin"}), 400
@@ -101,9 +101,12 @@ def getsubs():
     crns = getCRNsByUser(email)
 
     for crn in crns:
-        subs[crn] = getCourseName(crn)
+        sublist.append({
+            "crn": crn,
+            "cname": getCourseName(crn)
+        })
 
-    return jsonify({"subs": subs}), 200
+    return jsonify({"subs": sublist}), 200
 
 @app.route('/unsubscribe', methods=['GET'])
 def unsubscribe():
