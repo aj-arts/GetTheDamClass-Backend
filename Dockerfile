@@ -11,18 +11,10 @@ COPY app/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code into the container
-COPY app/ .
-
-# Ensure the container can read the .env file
-COPY .env /app/.env
+COPY . .
 
 # Expose the Flask application port
 EXPOSE 5000
 
-# Set environment variables for Flask
-ENV FLASK_APP=server.py  
-ENV FLASK_ENV=production
-ENV PYTHONUNBUFFERED=1
-
 # Run the Flask application
-CMD ["python", "server.py"]
+CMD ["python", "app/server.py"]

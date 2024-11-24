@@ -2,17 +2,31 @@ import mysql.connector
 import bcrypt
 from dotenv import load_dotenv
 import os
+import time
 
 load_dotenv()
 
-# Database Connection
-myDb = mysql.connector.connect(
-    host="localhost",
-    port= os.getenv("DATABASE_PORT"),
-    user= os.getenv("DATABASE_USER"),
-    password= os.getenv("DATABASE_PASSWORD"),
-    database=os.getenv("DATABASE_NAME")
-)
+# Database Connection 
+# We have try catch as the flask server may start prior to the sql container being completly ready
+def connect_to_db(attempts=5, delay=5):
+    for attempt in range(attempts):
+        try:
+            myDb = mysql.connector.connect(
+                host="localhost",
+                port=os.getenv("DATABASE_PORT"),
+                user=os.getenv("DATABASE_USER"),
+                password=os.getenv("DATABASE_PASSWORD"),
+                database=os.getenv("DATABASE_NAME")
+            )
+            return myDb
+        except mysql.connector.Error as err:
+            print(f"Attempt {attempt + 1} failed: {err}")
+            if attempt < attempts - 1:
+                time.sleep(delay)
+            else:
+                raise
+
+myDb = connect_to_db()
 
 cursor = myDb.cursor()
 

@@ -14,7 +14,7 @@ services:
       - ./app:/app             # Mount app folder for development
     depends_on:
       - db
-    restart: always
+    restart: on-failure        # Restart only on crashes
 
   db:
     image: mysql:8.0
@@ -28,7 +28,7 @@ services:
       MYSQL_PASSWORD: ${DATABASE_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
-    restart: always
+    restart: on-failure        # Restart only on crashes
 
 volumes:
   mysql_data:
