@@ -115,14 +115,22 @@ def confirmSub(crn, email):
         print("Failed to send confirmation email")
 
 def checkVacancies():
+    print("Checking for vacancies...")
     for crn in getUniqueCRNs():
         isvacant = isVacant(crn)
+        print(f"CRN {crn} is vacant: {isvacant}")
         wasvacant = wasVacant(crn)
+        print(f"CRN {crn} was vacant: {wasvacant}")
         if isvacant and not wasvacant:
             users = getUsersByCRN(crn)
             notifyUsers(crn, isvacant, users)
             setWasVacant(crn, True)
+            print(f"Notification class is vacant sent for CRN {crn}")
+            print(f"CRN {crn} is now marked as vacant")
         elif not isvacant and wasvacant:
             users = getUsersByCRN(crn)
             notifyUsers(crn, isvacant, users)
             setWasVacant(crn, False)
+            print(f"Notification class is not vacant anymore sent for CRN {crn}")
+            print(f"CRN {crn} is now marked as full")
+    print("Vacancy check complete")
