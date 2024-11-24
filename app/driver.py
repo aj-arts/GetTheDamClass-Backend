@@ -41,7 +41,7 @@ def valid(email, pin):
 
 def addUser(email, pin):
     hashed = bcrypt.hashpw(pin.encode(), bcrypt.gensalt())
-    cursor.execute("INSERT INTO Users (EMAIL_ADDRESS, HASHED_PIN) VALUES (%s, %s)", (email, hashed.decode()))
+    cursor.execute("INSERT IGNORE INTO Users (EMAIL_ADDRESS, HASHED_PIN) VALUES (%s, %s)", (email, hashed.decode()))
     myDb.commit()
     return True
 
@@ -52,7 +52,7 @@ def linkCRN(CRN, email):
         return False
 
     user_id = result[0]
-    cursor.execute("INSERT INTO Subscription (ID, CRN_NUMBER) VALUES (%s, %s)", (user_id, CRN))
+    cursor.execute("INSERT IGNORE INTO Subscription (ID, CRN_NUMBER) VALUES (%s, %s)", (user_id, CRN))
     myDb.commit()
     return True
 
@@ -161,3 +161,8 @@ def getCourseNameDB(crn):
     if result is None:
         return False
     return result[0]
+
+def userExists(email):
+    cursor.execute("SELECT ID FROM Users WHERE EMAIL_ADDRESS = %s", (email,))
+    result = cursor.fetchone()
+    return result is not None
