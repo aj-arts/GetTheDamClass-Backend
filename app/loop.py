@@ -50,8 +50,8 @@ def notifyUsers(crn, isvacant, users):
 
     port = os.getenv("EMAIL_PORT")
     smtp_server = os.getenv("EMAIL_SMTP")
-    sender_email = os.getenv("EMAIL")
-    password = os.getenv("PASSWORD")
+    sender_email = os.getenv("EMAIL_USER")
+    password = os.getenv("EMAIL_PASSWORD")
     status = "vacant" if isvacant else "full"
 
     body = f"Your class {cname} with CRN {crn} is {status}. Please check your schedule."

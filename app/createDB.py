@@ -9,7 +9,7 @@ load_dotenv()
 
 def create_database_and_tables():
     try:
-        # Establish the connection to MySQL server
+        # Connect to MySQL server
         connection = mysql.connector.connect(
             host="localhost",
             port= os.getenv("DATABASE_PORT"),
@@ -21,17 +21,19 @@ def create_database_and_tables():
         if connection.is_connected():
             cursor = connection.cursor()
 
-            # Step 1: Create a new database
-            database_name = os.getenv("DATABASE_NAME")  # Replace with your desired database name
+            # Create a new database
+            database_name = os.getenv("DATABASE_NAME") 
             create_database_query = f"CREATE DATABASE IF NOT EXISTS {database_name};"
             cursor.execute(create_database_query)
             print(f"Database '{database_name}' created or already exists.")
 
-            # Step 2: Use the created database
+            # Use the created database
             use_database_query = f"USE {database_name};"
             cursor.execute(use_database_query)
 
-            # Step 3: Create tables in the new database
+            # Create tables in the new database
+
+            #User table for 
             create_users_table = """
             CREATE TABLE IF NOT EXISTS Users (
                 ID INT AUTO_INCREMENT PRIMARY KEY,

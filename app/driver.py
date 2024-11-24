@@ -134,3 +134,17 @@ def setWasVacant(crn, vacant):
     if cursor.rowcount == 0:
         return False
     return True
+
+def setCourseName(crn, name):
+    cursor.execute("INSERT INTO Course_Name (CRN_NUMBER, COURSE_NAME) VALUES (%s, %s) ON DUPLICATE KEY UPDATE COURSE_NAME = %s", (crn, name, name))
+    myDb.commit()
+    if cursor.rowcount == 0:
+        return False
+    return True
+
+def getCourseName(crn):
+    cursor.execute("SELECT COURSE_NAME FROM Course_Name WHERE CRN_NUMBER = %s", (crn,))
+    result = cursor.fetchone()
+    if result is None:
+        return False
+    return result[0]
