@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify
-import threading
-from loop import loop, confirmSub, getCourseName
-from driver import addUser, linkCRN, unlinkCRN, getCRNsByUser, delSubscription
+from loop import checkVacancies, confirmSub, getCourseName
+from driver import valid, addUser, linkCRN, unlinkCRN, getCRNsByUser, delSubscription, deleteUser
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
 
 app = Flask(__name__)
 
@@ -39,6 +40,20 @@ def signup():
 
     return jsonify({"message": "User signed up successfully"}), 200
 
+@app.route('/deleteuser', methods=['POST'])
+def deleteuser():
+    data = request.json
+    email = data.get("email")
+    pin = data.get("pin")
+
+    if not validEmail(email) or not validPin(pin) or not valid(email, pin):
+        return jsonify({"message": "Invalid email or pin"}), 400
+    
+    if not deleteUser(email):
+        return jsonify({"message": "Couldn't delete user. Try again!"}), 400
+
+    return jsonify({"message": "User deleted successfully"}), 200
+
 @app.route('/sub', methods=['POST'])
 def sub():
     data = request.json
@@ -46,7 +61,7 @@ def sub():
     email = data.get("email")
     pin = data.get("pin")
 
-    if not validEmail(email) or not validPin(pin) or not validCRN(crn):
+    if not validEmail(email) or not validPin(pin) or not validCRN(crn) or not valid(email, pin):
         return jsonify({"message": "Invalid email, pin, or crn"}), 400
     
     if not linkCRN(crn, email):
@@ -63,7 +78,7 @@ def unsub():
     email = data.get("email")
     pin = data.get("pin")
 
-    if not validEmail(email) or not validPin(pin) or not validCRN(crn):
+    if not validEmail(email) or not validPin(pin) or not validCRN(crn) or not valid(email, pin):
         return jsonify({"message": "Invalid email, pin, or crn"}), 400
 
     if not unlinkCRN(crn, email):
@@ -78,7 +93,7 @@ def getsubs():
     pin = data.get("pin")
     subs = {}
 
-    if not validEmail(email) or not validPin(pin):
+    if not validEmail(email) or not validPin(pin) or not valid(email, pin):
         return jsonify({"message": "Invalid email or pin"}), 400
 
     crns = getCRNsByUser(email)
@@ -100,7 +115,24 @@ def unsubscribe():
     
     return jsonify({"message": f"Unsubscribed successfully"}), 200
 
+scheduler = BackgroundScheduler()
+scheduler.add_job(
+    func=checkVacancies,
+    trigger=IntervalTrigger(seconds=60),
+    id='checkVacancies',
+    name='Check for class vacancies every 60 seconds',
+    replace_existing=True,
+)
+scheduler.start()
+print("Scheduler started...")
+
+def scheduler_shutdown():
+    if scheduler.running:
+        scheduler.shutdown(wait=False)
+        print("Scheduler stopped...")
+
 if __name__ == '__main__':
-    task_thread = threading.Thread(target=loop, daemon=True)
-    task_thread.start()
-    app.run(host='0.0.0.0', port=5000)
+    try:
+        app.run(host='0.0.0.0', port=5000)
+    except (KeyboardInterrupt, SystemExit):
+        scheduler_shutdown()
