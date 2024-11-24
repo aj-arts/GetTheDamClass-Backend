@@ -4,6 +4,9 @@ from driver import valid, addUser, linkCRN, unlinkCRN, getCRNsByUser, delSubscri
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from flask_cors import CORS
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/sub": {"origins": "*"}})
@@ -70,6 +73,12 @@ def deleteuser():
     if not validEmail(email) or not validPin(pin) or not valid(email, pin):
         return jsonify({"message": "Invalid email or pin"}), 400
     
+    if not valid(email, pin):
+        return jsonify({"message": "User authentication failed"}), 401
+    
+    if not userExists(email):
+        return jsonify({"message": "User doesn't exist"}), 400
+    
     if not deleteUser(email):
         print(f"Failed to delete user: {email}")
         return jsonify({"message": "Couldn't delete user. Try again!"}), 400
@@ -87,8 +96,15 @@ def sub():
 
     print(f"Subscribe attempt: email={email}, pin={pin}, crn={crn}")
 
-    if not validEmail(email) or not validPin(pin) or not validCRN(crn) or not valid(email, pin):
+    if not validEmail(email) or not validPin(pin) or not validCRN(crn):
         return jsonify({"message": "Invalid email, pin, or crn"}), 400
+    
+    if not valid(email, pin):
+        return jsonify({"message": "User authentication failed"}), 401
+    
+    if not userExists(email):
+        print(f"User doesn't exist: {email}")
+        return jsonify({"message": "User doesn't exist"}), 400
     
     if not crnExists(crn):
         print(f"CRN doesn't exist: {crn}")
@@ -116,8 +132,15 @@ def unsub():
 
     print(f"Unsubscribe attempt: email={email}, pin={pin}, crn={crn}")
 
-    if not validEmail(email) or not validPin(pin) or not validCRN(crn) or not valid(email, pin):
+    if not validEmail(email) or not validPin(pin) or not validCRN(crn):
         return jsonify({"message": "Invalid email, pin, or crn"}), 400
+    
+    if not valid(email, pin):
+        return jsonify({"message": "User authentication failed"}), 401
+    
+    if not userExists(email):
+        print(f"User doesn't exist: {email}")
+        return jsonify({"message": "User doesn't exist"}), 400
     
     if not crnExists(crn):
         print(f"CRN doesn't exist: {crn}")
@@ -143,8 +166,11 @@ def getsubs():
 
     print(f"Get subscriptions: email={email}, pin={pin}")
 
-    if not validEmail(email) or not validPin(pin) or not valid(email, pin):
+    if not validEmail(email) or not validPin(pin):
         return jsonify({"message": "Invalid email or pin"}), 400
+    
+    if not valid(email, pin):
+        return jsonify({"message": "User authentication failed"}), 401
 
     crns = getCRNsByUser(email)
     sublist = [{"crn": crn, "cname": getCourseName(crn)} for crn in crns]
