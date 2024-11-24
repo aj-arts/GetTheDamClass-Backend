@@ -87,16 +87,15 @@ def confirmSub(crn, email):
         server.login(sender_email, password)
         server.sendmail(msg["From"], msg["To"], msg.as_string())
 
-def loop():
-    while True:
-        for crn in unique_crns:
-            isvacant = isVacant(crn)
-            wasvacant = wasVacant(crn)
-            if isvacant and not wasvacant:
-                users = getUsersByCRN(crn)
-                notifyUsers(crn, isvacant, users)
-                setWasVacant(crn, True)
-            elif not isvacant and wasvacant:
-                users = getUsersByCRN(crn)
-                notifyUsers(crn, isvacant, users)
-                setWasVacant(crn, False)
+def checkVacancies():
+    for crn in getUniqueCRNs():
+        isvacant = isVacant(crn)
+        wasvacant = wasVacant(crn)
+        if isvacant and not wasvacant:
+            users = getUsersByCRN(crn)
+            notifyUsers(crn, isvacant, users)
+            setWasVacant(crn, True)
+        elif not isvacant and wasvacant:
+            users = getUsersByCRN(crn)
+            notifyUsers(crn, isvacant, users)
+            setWasVacant(crn, False)
