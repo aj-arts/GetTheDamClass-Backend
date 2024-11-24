@@ -204,11 +204,6 @@ def confirmSub(crn, email):
     msg.attach(mime_html)
 
     context = ssl.create_default_context()
-    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-        server.login(sender_email, password)
-        server.sendmail(msg["From"], msg["To"], msg.as_string())
-
-    context = ssl.create_default_context()
     try:
         with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
             server.login(sender_email, password)
