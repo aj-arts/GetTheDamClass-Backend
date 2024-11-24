@@ -49,11 +49,11 @@ def signup():
     
     if userExists(email):
         print(f"User already exists: {email}")
-        return jsonify({"message": "User already exists"}), 400
+        return jsonify({"message": "User already exists"}), 409
     
     if not addUser(email, pin):
         print(f"Failed to add user: {email}")
-        return jsonify({"message": "Couldn't add use. Try signing up again!"}), 400
+        return jsonify({"message": "Couldn't add user. Try signing up again!"}), 400
 
     print(f"User signed up successfully: {email}")
     return jsonify({"message": "User signed up successfully"}), 200
@@ -96,7 +96,7 @@ def sub():
     
     if subExists(crn, email):
         print(f"Already subscribed: email={email}, crn={crn}")
-        return jsonify({"message": "Already subscribed to class"}), 400
+        return jsonify({"message": "Already subscribed to class"}), 409
     
     if not linkCRN(crn, email):
         print(f"Failed to link CRN: email={email}, crn={crn}")
