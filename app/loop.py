@@ -71,6 +71,8 @@ def notifyUsers(crn, isvacant, users):
         server.sendmail(msg["From"], users + [msg["To"]], msg.as_string())
 
 def confirmSub(crn, email):
+    status = isVacant(crn)
+    setWasVacant(crn, status)
     cname = getCourseName(crn)
     unsubval = getUnsubValue(crn, email)
 
