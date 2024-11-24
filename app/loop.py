@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 from email.mime.text import MIMEText
 import ssl
-from driver import valid, addUser, linkCRN, unlinkCRN, getCRNsByUser, delUser, getUniqueCRNs, getUsersByCRN, getUnsubValue
+from driver import valid, addUser, linkCRN, unlinkCRN, getCRNsByUser, delUser, getUniqueCRNs, getUsersByCRN, getUnsubValue, deleteUser
 
 load_dotenv()
 
@@ -65,6 +65,27 @@ def notifyUsers(crn, isvacant, users):
     with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
         server.login(sender_email, password)
         server.sendmail(msg["From"], users + [msg["To"]], msg.as_string())
+
+def confirmSub(crn, email):
+    cname = getCourseName(crn)
+    unsubval = getUnsubValue(crn, email)
+
+    port = os.getenv("EMAIL_PORT")
+    smtp_server = os.getenv("EMAIL_SMTP")
+    sender_email = os.getenv("EMAIL")
+    password = os.getenv("PASSWORD")
+    baseurl = os.getenv("BASE_URL")
+
+    body = f"Thank you for subscribing to {cname} with CRN {crn}. To unsubscribe, click the following link: {baseurl}/unsubscribe?value={unsubval}"
+    msg = MIMEText(body)
+    msg["From"] = sender_email
+    msg["To"] = email
+    msg["Subject"] = f"GetTheDamClass Subscription Confirmation for {cname}"
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(msg["From"], msg["To"], msg.as_string())
 
 def loop():
     while True:
