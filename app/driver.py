@@ -166,3 +166,14 @@ def userExists(email):
     cursor.execute("SELECT ID FROM Users WHERE EMAIL_ADDRESS = %s", (email,))
     result = cursor.fetchone()
     return result is not None
+
+def subExists(email, CRN):
+    cursor.execute("SELECT ID FROM Users WHERE EMAIL_ADDRESS = %s", (email,))
+    result = cursor.fetchone()
+    if result is None:
+        return False
+
+    user_id = result[0]
+    cursor.execute("SELECT ID FROM Subscription WHERE ID = %s AND CRN_NUMBER = %s", (user_id, CRN))
+    result = cursor.fetchone()
+    return result is not None

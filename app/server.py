@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from loop import checkVacancies, confirmSub, getCourseName, crnExists
-from driver import valid, addUser, linkCRN, unlinkCRN, getCRNsByUser, delSubscription, deleteUser, userExists
+from driver import valid, addUser, linkCRN, unlinkCRN, getCRNsByUser, delSubscription, deleteUser, userExists, subExists
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from flask_cors import CORS
@@ -72,6 +72,9 @@ def sub():
     if not crnExists(crn):
         return jsonify({"message": "CRN doesn't exist"}), 400
     
+    if subExists(crn, email):
+        return jsonify({"message": "Already subscribed to class"}), 400
+    
     if not linkCRN(crn, email):
         return jsonify({"message": "Couldn't subscribe to class. Try again!"}), 400
     
@@ -91,6 +94,9 @@ def unsub():
     
     if not crnExists(crn):
         return jsonify({"message": "CRN doesn't exist"}), 400
+    
+    if not subExists(crn, email):
+        return jsonify({"message": "Not subscribed to class"}), 400
 
     if not unlinkCRN(crn, email):
         return jsonify({"message": "Couldn't unsubscribe from class. Try again!"}), 400
