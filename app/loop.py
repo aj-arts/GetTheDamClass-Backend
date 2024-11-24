@@ -91,7 +91,7 @@ def confirmSub(crn, email):
     status = isVacant(crn)
     setWasVacant(crn, status)
     cname = getCourseName(crn)
-    unsubval = getUnsubValue(crn, email)
+    unsubval = getUnsubValue(email, crn)
 
     port = os.getenv("EMAIL_PORT")
     smtp_server = os.getenv("EMAIL_HOST")
