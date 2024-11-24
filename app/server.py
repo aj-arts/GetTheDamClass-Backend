@@ -146,7 +146,7 @@ def unsub():
         print(f"CRN doesn't exist: {crn}")
         return jsonify({"message": "CRN doesn't exist"}), 400
     
-    if not subExists(crn, email):
+    if not subExists(email, crn):
         print(f"Not subscribed: email={email}, crn={crn}")
         return jsonify({"message": "Not subscribed to class"}), 400
 
