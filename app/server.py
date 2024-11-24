@@ -110,7 +110,7 @@ def sub():
         print(f"CRN doesn't exist: {crn}")
         return jsonify({"message": "CRN doesn't exist"}), 400
     
-    if subExists(crn, email):
+    if subExists(email, crn):
         print(f"Already subscribed: email={email}, crn={crn}")
         return jsonify({"message": "Already subscribed to class"}), 409
     
