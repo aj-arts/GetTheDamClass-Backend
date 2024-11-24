@@ -6,7 +6,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from flask_cors import CORS
 
 app = Flask(__name__)
-cors = CORS(app, resources={r"/sub/": {"origins": "*.oregonstate.edu"}})
+cors = CORS(app, resources={r"/sub": {"origins": "*"}})
 
 def validEmail(email):
     if email is None or email == "" or "@" not in email or email.strip() == "":
