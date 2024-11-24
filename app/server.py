@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from loop import checkVacancies, confirmSub, getCourseName
-from driver import valid, addUser, linkCRN, unlinkCRN, getCRNsByUser, delSubscription, deleteUser
+from driver import valid, addUser, linkCRN, unlinkCRN, getCRNsByUser, delSubscription, deleteUser, userExists
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from flask_cors import CORS
@@ -36,6 +36,9 @@ def signup():
 
     if not validEmail(email) or not validPin(pin):
         return jsonify({"message": "Invalid email or pin"}), 400
+    
+    if userExists(email):
+        return jsonify({"message": "User already exists"}), 400
     
     if not addUser(email, pin):
         return jsonify({"message": "Couldn't add use. Try siging up again!"}), 400
