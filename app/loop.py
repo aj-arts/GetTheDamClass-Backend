@@ -12,7 +12,7 @@ load_dotenv()
 
 def crnExists(crn):
     data = {
-        'term': '202503',
+        'term': '202601',
         'courseReferenceNumber': crn,
     }
 
@@ -27,7 +27,7 @@ def getCourseName(crn):
     cname = getCourseNameDB(crn)
     if not cname:
         data = {
-            'term': '202503',
+            'term': '202601',
             'courseReferenceNumber': crn,
         }
 
@@ -51,7 +51,7 @@ def isVacant(crn):
     response = requests.post(
         'https://prodapps.isadm.oregonstate.edu/StudentRegistrationSsb/ssb/searchResults/getEnrollmentInfo',
         data={
-            'term': '202503',
+            'term': '202601',
             'courseReferenceNumber': crn,
         },
     )
