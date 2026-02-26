@@ -203,6 +203,36 @@ def setWasVacant(crn, vacant):
         cursor.close()
         conn.close()
 
+def wasWaitlistAvail(crn):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT WAITLIST_AVAILABLE FROM CRN_Status WHERE CRN_NUMBER = %s", (crn,))
+        result = cursor.fetchone()
+        return result[0] if result else False
+    finally:
+        cursor.close()
+        conn.close()
+
+def setWasWaitlistAvail(crn, available):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE CRN_Status SET WAITLIST_AVAILABLE = %s WHERE CRN_NUMBER = %s",
+            (available, crn),
+        )
+        if cursor.rowcount == 0:
+            cursor.execute(
+                "INSERT INTO CRN_Status (CRN_NUMBER, VACANT, WAITLIST_AVAILABLE) VALUES (%s, %s, %s)",
+                (crn, False, available),
+            )
+        conn.commit()
+        return True
+    finally:
+        cursor.close()
+        conn.close()
+
 def setCourseNameDB(crn, name):
     try:
         conn = get_db_connection()

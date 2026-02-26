@@ -7,6 +7,30 @@ import os
 load_dotenv()
 
 
+def ensure_waitlist_available_column(cursor, database_name):
+    cursor.execute(
+        """
+        SELECT COUNT(*)
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = %s
+          AND TABLE_NAME = 'CRN_Status'
+          AND COLUMN_NAME = 'WAITLIST_AVAILABLE'
+        """,
+        (database_name,),
+    )
+    exists = cursor.fetchone()[0] > 0
+    if not exists:
+        cursor.execute(
+            """
+            ALTER TABLE CRN_Status
+            ADD COLUMN WAITLIST_AVAILABLE BOOLEAN NOT NULL DEFAULT FALSE;
+            """
+        )
+        print("WAITLIST_AVAILABLE column added to CRN_Status table.")
+    else:
+        print("WAITLIST_AVAILABLE column already exists on CRN_Status table.")
+
+
 def create_database_and_tables():
     try:
         # Connect to MySQL server
@@ -55,7 +79,8 @@ def create_database_and_tables():
             create_crn_status_table = """
             CREATE TABLE IF NOT EXISTS CRN_Status (
                 CRN_NUMBER INT PRIMARY KEY,
-                VACANT BOOLEAN NOT NULL
+                VACANT BOOLEAN NOT NULL,
+                WAITLIST_AVAILABLE BOOLEAN NOT NULL DEFAULT FALSE
             );
             """
 
@@ -76,6 +101,7 @@ def create_database_and_tables():
 
             cursor.execute(create_crn_status_table)
             print("CRN_Status table created successfully.")
+            ensure_waitlist_available_column(cursor, database_name)
 
             cursor.execute(create_course_name_table)
             print("Course_Name table created successfully.")
@@ -118,13 +144,13 @@ def insert_test_data():
 
             # Insert test data into CRN_Status table
             cursor.execute("""
-                INSERT INTO CRN_Status (CRN_NUMBER, VACANT)
+                INSERT INTO CRN_Status (CRN_NUMBER, VACANT, WAITLIST_AVAILABLE)
                 VALUES
-                (12345, TRUE),
-                (23456, FALSE),
-                (34567, TRUE),
-                (45678, FALSE),
-                (56789, TRUE);
+                (12345, TRUE, FALSE),
+                (23456, FALSE, TRUE),
+                (34567, TRUE, FALSE),
+                (45678, FALSE, FALSE),
+                (56789, TRUE, TRUE);
             """)
             print("Test data inserted into CRN_Status table.")
 
