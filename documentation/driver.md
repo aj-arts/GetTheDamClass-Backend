@@ -123,23 +123,6 @@
 
 ---
 
-## `wasWaitlistAvail(crn)`
-- **Description:** Checks the waitlist availability status of a CRN.
-- **Parameters:** 
-  - `crn` (int): The CRN number.
-- **Returns:** `True` if the waitlist has available spots, `False` otherwise.
-
----
-
-## `setWasWaitlistAvail(crn, available)`
-- **Description:** Updates the waitlist availability status of a CRN.
-- **Parameters:** 
-  - `crn` (int): The CRN number.
-  - `available` (bool): Waitlist availability status.
-- **Returns:** `True` after a successful update.
-
----
-
 ## `setCourseName(crn, name)`
 - **Description:** Updates or inserts the course name for a CRN.
 - **Parameters:** 

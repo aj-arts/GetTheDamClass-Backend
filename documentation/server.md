@@ -185,11 +185,3 @@
   ```
 
 ---
-
-## Background Monitoring
-
-- A scheduler runs every 60 seconds to monitor subscribed CRNs.
-- The monitor checks:
-  - class seat vacancy transitions (vacant/full), and
-  - waitlist availability transitions (waitlist spots available/waitlist full).
-- Notifications are sent on status transitions only, to avoid duplicate emails while state is unchanged.

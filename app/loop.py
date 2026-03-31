@@ -6,26 +6,13 @@ import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import ssl
-from driver import (
-    getUniqueCRNs,
-    getUsersByCRN,
-    getUnsubValue,
-    wasVacant,
-    setWasVacant,
-    wasWaitlistAvail,
-    setWasWaitlistAvail,
-    getCourseNameDB,
-    setCourseNameDB,
-    purgeUnusedCRNs,
-)
+from driver import getUniqueCRNs, getUsersByCRN, getUnsubValue, wasVacant, setWasVacant, getCourseNameDB, setCourseNameDB, purgeUnusedCRNs
 
 load_dotenv()
 
-TERM = 202603
-
 def crnExists(crn):
     data = {
-        'term': str(TERM),
+        'term': '202603',
         'courseReferenceNumber': crn,
     }
 
@@ -40,7 +27,7 @@ def getCourseName(crn):
     cname = getCourseNameDB(crn)
     if not cname:
         data = {
-            'term': str(TERM),
+            'term': '202603',
             'courseReferenceNumber': crn,
         }
 
@@ -64,7 +51,7 @@ def isVacant(crn):
     response = requests.post(
         'https://prodapps.isadm.oregonstate.edu/StudentRegistrationSsb/ssb/searchResults/getEnrollmentInfo',
         data={
-            'term': str(TERM),
+            'term': '202603',
             'courseReferenceNumber': crn,
         },
     )
@@ -76,68 +63,17 @@ def isVacant(crn):
     vacancy = capacity - actual
     return vacancy > 0
 
-def hasWaitlistAvail(crn):
-    url = "https://classes.oregonstate.edu/api/?page=fose&route=details"
-    headers = {
-        "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
-    }
-    payload = {"key": f"crn:{crn}", "srcdb": str(TERM)}
-
-    try:
-        response = requests.post(url, headers=headers, json=payload, timeout=15)
-        response.raise_for_status()
-        body = response.json()
-        if not isinstance(body, dict):
-            raise ValueError(f"Unexpected response shape: {type(body)}")
-        avail = int(body.get("ssbsect_wait_avail", "0"))
-        return avail > 0
-    except (requests.RequestException, ValueError, TypeError) as err:
-        print(f"Failed to fetch waitlist availability for CRN {crn}: {err}")
-        return None
-
-def getNotificationContent(event_type, cname, crn):
-    content_map = {
-        "class_open": {
-            "subject_prefix": "Class Open",
-            "headline": "Class seat available",
-            "message": f"your class {cname} with CRN {crn} now has an open seat.",
-        },
-        "class_closed": {
-            "subject_prefix": "Class Full",
-            "headline": "Class is full",
-            "message": f"your class {cname} with CRN {crn} is now full.",
-        },
-        "waitlist_open": {
-            "subject_prefix": "Waitlist Open",
-            "headline": "Waitlist spots available",
-            "message": f"the waitlist for {cname} with CRN {crn} now has available spots.",
-        },
-        "waitlist_closed": {
-            "subject_prefix": "Waitlist Full",
-            "headline": "Waitlist is full",
-            "message": f"the waitlist for {cname} with CRN {crn} is now full.",
-        },
-    }
-    if event_type not in content_map:
-        raise ValueError(f"Unsupported notification event type: {event_type}")
-    return content_map[event_type]
-
-def notifyUsers(crn, event_type, users):
-    if not users:
-        print(f"No users to notify for CRN {crn} event {event_type}")
-        return
-
+def notifyUsers(crn, isvacant, users):
     cname = getCourseName(crn)
-    content = getNotificationContent(event_type, cname, crn)
 
     port = os.getenv("EMAIL_PORT")
     smtp_server = os.getenv("EMAIL_HOST")
     sender_email = os.getenv("EMAIL_USER")
     password = os.getenv("EMAIL_PASSWORD")
+    status = "vacant" if isvacant else "full"
 
     msg = MIMEMultipart("alternative")
-    msg["Subject"] = f"GetTheDamClass {content['subject_prefix']} Notification for {cname}"
+    msg["Subject"] = f"GetTheDamClass Notification for {cname}"
     msg["From"] = sender_email
     msg["To"] = sender_email
     msg["BCC"] = ", ".join(users)
@@ -221,11 +157,11 @@ def notifyUsers(crn, event_type, users):
         <body>
             <div class="email-container">
                 <div class="email-header">
-                    <h1>{content['headline']} for {cname} - {crn}</h1>
+                    <h1>Notification for {cname} - {crn}</h1>
                 </div>
                 <div class="email-body">
                     <p>Hello,</p>
-                    <p>We wanted to let you know that {content['message']} If you want to unsubscribe from notifications, feel free to use the extension.</p>
+                    <p>We wanted to let you know that your class {cname} with CRN {crn} is {status}. If you want to unsubscribe from notifications, feel free to use the extension.</p>
                     <p>If you have any questions, feel free to reach out to us.</p>
                 </div>
                 <div class="email-footer">
@@ -250,11 +186,6 @@ def notifyUsers(crn, event_type, users):
 def confirmSub(crn, email):
     status = isVacant(crn)
     setWasVacant(crn, status)
-    waitlist_status = hasWaitlistAvail(crn)
-    if waitlist_status is not None:
-        setWasWaitlistAvail(crn, waitlist_status)
-    else:
-        print(f"Failed to initialize waitlist status for CRN {crn}")
     cname = getCourseName(crn)
     unsubval = getUnsubValue(email, crn)
 
@@ -380,44 +311,20 @@ def checkVacancies():
     print("Checking for vacancies...")
     print("Purged unused CRNs") if purgeUnusedCRNs() else print("Failed to purge unused CRNs")
     for crn in getUniqueCRNs():
-        try:
-            isvacant = isVacant(crn)
-        except Exception as err:
-            print(f"Failed to fetch class vacancy for CRN {crn}: {err}")
-            continue
-        iswaitlistavail = hasWaitlistAvail(crn)
-
+        isvacant = isVacant(crn)
         print(f"CRN {crn} is vacant: {isvacant}")
         wasvacant = wasVacant(crn)
         print(f"CRN {crn} was vacant: {wasvacant}")
-        class_event = None
         if isvacant and not wasvacant:
-            class_event = "class_open"
-        elif not isvacant and wasvacant:
-            class_event = "class_closed"
-
-        waitlist_event = None
-        if iswaitlistavail is not None:
-            print(f"CRN {crn} has waitlist availability: {iswaitlistavail}")
-            waswaitlistavail = wasWaitlistAvail(crn)
-            print(f"CRN {crn} previously had waitlist availability: {waswaitlistavail}")
-            if iswaitlistavail and not waswaitlistavail:
-                waitlist_event = "waitlist_open"
-            elif not iswaitlistavail and waswaitlistavail:
-                waitlist_event = "waitlist_closed"
-        else:
-            print(f"Skipping waitlist notifications for CRN {crn} due to API error")
-
-        if class_event or waitlist_event:
             users = getUsersByCRN(crn)
-            if class_event:
-                notifyUsers(crn, class_event, users)
-                setWasVacant(crn, isvacant)
-                print(f"Sent class transition notification for CRN {crn}: {class_event}")
-                print(f"CRN {crn} vacancy state updated to {isvacant}")
-            if waitlist_event:
-                notifyUsers(crn, waitlist_event, users)
-                setWasWaitlistAvail(crn, iswaitlistavail)
-                print(f"Sent waitlist transition notification for CRN {crn}: {waitlist_event}")
-                print(f"CRN {crn} waitlist state updated to {iswaitlistavail}")
+            notifyUsers(crn, isvacant, users)
+            setWasVacant(crn, True)
+            print(f"Notification class is vacant sent for CRN {crn}")
+            print(f"CRN {crn} is now marked as vacant")
+        elif not isvacant and wasvacant:
+            users = getUsersByCRN(crn)
+            notifyUsers(crn, isvacant, users)
+            setWasVacant(crn, False)
+            print(f"Notification class is not vacant anymore sent for CRN {crn}")
+            print(f"CRN {crn} is now marked as full")
     print("Vacancy check complete")
