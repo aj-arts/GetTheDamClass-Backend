@@ -1,0 +1,50 @@
+services:
+  app-local:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gtdc_app_local
+    working_dir: /app
+    command: sh -c "python createDB.py && python server.py"
+    ports:
+      - "127.0.0.1:5001:5000"
+    env_file:
+      - app/.env.local
+    environment:
+      FLASK_ENV: development
+      FLASK_DEBUG: 1
+      FLASK_APP: server.py
+      BASE_URL: http://localhost:5001
+      DATABASE_HOST: db-local
+      DATABASE_PORT: 3306
+      DATABASE_NAME: getthedamclass_local
+      DATABASE_USER: root
+      DATABASE_PASSWORD: root
+      PYTHONUNBUFFERED: 1
+    volumes:
+      - ./app:/app
+    depends_on:
+      db-local:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db-local:
+    image: mysql:8.0
+    container_name: gtdc_mysql_local
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "127.0.0.1:3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: getthedamclass_local
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - mysql_local_data:/var/lib/mysql
+    restart: unless-stopped
+
+volumes:
+  mysql_local_data:
