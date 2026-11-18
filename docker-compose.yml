@@ -16,7 +16,7 @@ services:
       - PYTHONUNBUFFERED=1
     depends_on:
       - db
-    restart: on-failure        # Restart only on crashes
+    restart: unless-stopped    # Restart on exit or daemon restart, unless stopped manually
 
   db:
     image: mysql:8.0
@@ -30,7 +30,7 @@ services:
       MYSQL_PASSWORD: ${DATABASE_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
-    restart: on-failure        # Restart only on crashes
+    restart: unless-stopped    # Restart on exit or daemon restart, unless stopped manually
 
 volumes:
   mysql_data:
